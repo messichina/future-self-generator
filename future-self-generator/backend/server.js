@@ -4,6 +4,7 @@ const cors = require('cors');
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
+const { put } = require('@vercel/blob');
 require('dotenv').config();
 
 const app = express();
@@ -22,18 +23,54 @@ const DOUBAO_API_URL = process.env.DOUBAO_API_URL || 'https://api.doubao.com/v1/
 const DOUBAO_API_KEY = process.env.DOUBAO_API_KEY;
 
 // 生成未来自己的API端点
-app.post('/api/generate', upload.single('photo'), async (req, res) => {
-    try {
-        if (!req.file || !req.body.profession) {
-            return res.status(400).json({ error: '请提供照片和职业信息' });
-        }
+app.post('/api/generate', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded.' });
+    }
 
-        const { profession } = req.body;
-        const imagePath = req.file.path;
+    // 1. 将上传的图片存储到 Vercel Blob，并获取公共URL
+    const blob = await put('uploaded-image.png', req.file.buffer, {
+      access: 'public',
+    });
+    console.log('图片已上传，URL:', blob.url);
 
-        // 将图片转换为base64
-        const imageBuffer = fs.readFileSync(imagePath);
-        const base64Image = imageBuffer.toString('base64');
+    // 2. 构建发送给豆包API的请求体
+    const requestBody = {
+      model: "doubao-seedream-4-0-250828", // 使用示例中的模型
+      prompt: "请根据这张照片，生成一张20年后的我的照片。", // 您可以自定义这个提示词
+      image: [blob.url], // 关键：使用 Vercel Blob 返回的图片URL
+      response_format: "url",
+      size: "2K",
+      // stream: true, // 如果您需要流式响应，可以打开这个，但处理会更复杂
+    };
+
+    // 3. 调用豆包API
+    const apiResponse = await fetch(process.env.ARK_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.ARK_API_KEY}`,
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!apiResponse.ok) {
+      const errorText = await apiResponse.text();
+      console.error('豆包API调用失败:', apiResponse.status, errorText);
+      return res.status(apiResponse.status).json({ error: '豆包API调用失败', details: errorText });
+    }
+
+    // 4. 处理豆包API的响应并返回给前端
+    const data = await apiResponse.json();
+    res.json(data);
+
+  } catch (error) {
+    console.error('服务器内部错误:', error);
+    res.status(500).json({ error: '服务器内部错误', details: error.message });
+  }
+});
+
 
         // 构建提示词
         const prompt = `生成一张二十年后的照片，人物职业是${profession}，保持人物面部特征和身份的一致性，展现成熟稳重的气质，高质量照片，真实感强`;
@@ -82,3 +119,4 @@ app.post('/api/generate', upload.single('photo'), async (req, res) => {
 app.listen(PORT, () => {
     console.log(`服务器运行在端口 ${PORT}`);
 });
+
