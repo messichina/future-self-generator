@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public')));
 
 // 配置multer用于文件上传
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ storage: multer.memoryStorage() });
 
 // 豆包seeddream4.0 API配置
 const DOUBAO_API_URL = process.env.DOUBAO_API_URL || 'https://api.doubao.com/v1/seeddream/generate';
