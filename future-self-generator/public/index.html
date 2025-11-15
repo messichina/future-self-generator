@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二十年后的自己 - AI照片生成器</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>二十年后的自己</h1>
+            <p>上传您的照片，输入期望的职业，看看二十年后的您是什么样子</p>
+        </header>
+        
+        <main>
+            <div class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📷</div>
+                    <p>点击或拖拽上传您的照片</p>
+                    <input type="file" id="photoInput" accept="image/*" hidden>
+                </div>
+                <div class="preview-container" id="previewContainer" style="display: none;">
+                    <img id="photoPreview" alt="您的照片">
+                    <button id="changePhoto" class="btn-secondary">更换照片</button>
+                </div>
+            </div>
+            
+            <div class="input-section">
+                <label for="professionInput">期望的职业</label>
+                <input type="text" id="professionInput" placeholder="例如：软件工程师、医生、教师...">
+            </div>
+            
+            <div class="generate-section">
+                <button id="generateBtn" class="btn-primary" disabled>生成二十年后的自己</button>
+            </div>
+            
+            <div class="loading" id="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>AI正在为您生成二十年后的照片，请稍候...</p>
+            </div>
+            
+            <div class="result-section" id="resultSection" style="display: none;">
+                <h2>二十年后的您</h2>
+                <div class="result-image-container">
+                    <img id="resultImage" alt="二十年后的您">
+                </div>
+                <div class="result-actions">
+                    <button id="downloadBtn" class="btn-primary">下载照片</button>
+                    <button id="regenerateBtn" class="btn-secondary">重新生成</button>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>由豆包seeddream4.0模型驱动 | 主体一致性最佳AI模型</p>
+        </footer>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
